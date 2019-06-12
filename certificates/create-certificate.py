@@ -63,7 +63,7 @@ def createCertificate(outputDir, data, institution, rank):
   size = 0.1
 
   if len(inst) > 20:
-    size = 0.1 * 20 / len(inst) 
+    size = 0.1 * 20 / len(inst)
 
   doc.addKeyVal(inst, 0.5, 0.55, size, font="Arimo-Bold")
   doc.addKeyVal("to be ranked #" + str(data["rank"]) + " in the " + data["challenge"], 0.5, 0.48, size=0.05)
@@ -80,13 +80,15 @@ def createCertificate(outputDir, data, institution, rank):
   page.mergePage(foreground.getPage(0))
   output = PdfFileWriter()
   output.addPage(page)
-  outputStream = open(outputDir + "/" + str(rank) + ".pdf", "wb")
+  outputStream = open(outputDir + "-" + str(rank) + ".pdf", "wb")
   output.write(outputStream)
   outputStream.close()
 
 if __name__ == "__main__":
   input = sys.argv[4]
   output = sys.argv[5]
+  sort_by = sys.argv[6]
+  stop_at = 1
 
   list = {"release" : sys.argv[2],
           "list"    : sys.argv[1],
@@ -95,9 +97,11 @@ if __name__ == "__main__":
   csv = csv.DictReader(csvfile)
   # sort the systems according to their rank
   systems = [ x for x in csv]
-  systems.sort(key = lambda x : -float(x["io500__score"]))
+  systems.sort(key = lambda x : -float(x[sort_by]))
 
   rank = 1
   for p in systems:
     createCertificate(output, list, p["information__institution"], rank)
     rank = rank + 1
+    if rank > stop_at:
+      break
